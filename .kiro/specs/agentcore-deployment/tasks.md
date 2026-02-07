@@ -2,11 +2,21 @@
 
 **Spec**: agentcore-deployment
 **Created**: February 6, 2026
-**Last Updated**: February 6, 2026
+**Last Updated**: February 7, 2026
+
+## ⚠️ CRITICAL: AWS REGION REQUIREMENT ⚠️
+
+**ALL AWS deployments for this project MUST use `eu-west-1` (Europe - Ireland) ONLY.**
+
+This is a mandatory project requirement. See [AWS_REGION_POLICY.md](../../../AWS_REGION_POLICY.md) for details.
+
+**2026-02-07 Cleanup**: All resources were removed from us-east-1 and must be redeployed to eu-west-1.
+
+---
 
 ## Overview
 
-This task list covers deploying Strands SDK-based AI agents to AWS infrastructure using ECS Fargate for container orchestration. The agents use AWS Bedrock (Claude) as the foundation model and expose FastAPI HTTP endpoints.
+This task list covers deploying Strands SDK-based AI agents to AWS infrastructure using AgentCore Runtime. The agents use AWS Bedrock (Claude) as the foundation model and expose HTTP endpoints via AgentCore.
 
 ## Task Status Legend
 - `[ ]` Not Started
@@ -31,7 +41,7 @@ Create and configure ECR repository for test agent.
 - [x] 1.4 Set up lifecycle policies
 
 **Artifacts**:
-- Repository URI: `211125768252.dkr.ecr.us-east-1.amazonaws.com/vitracka/test-agent`
+- Repository URI: `732231126129.dkr.ecr.eu-west-1.amazonaws.com/vitracka/test-agent`
 
 ---
 
@@ -114,7 +124,7 @@ pip install bedrock-agentcore-runtime
 agentcore --version
 
 # Check Bedrock model access
-aws bedrock list-foundation-models --region us-east-1 --query "modelSummaries[?modelId=='anthropic.claude-3-5-sonnet-20241022-v2:0']"
+aws bedrock list-foundation-models --region eu-west-1 --query "modelSummaries[?modelId=='anthropic.claude-3-5-sonnet-20241022-v2:0']"
 ```
 
 ---
@@ -148,12 +158,12 @@ Deploy the test agent to AgentCore Runtime and verify functionality.
 ./scripts/deploy-agent-agentcore.ps1 `
   -AgentName test-agent `
   -AgentPath agents/test-agent `
-  -Region us-east-1
+  -Region eu-west-1
 
 # Manual test invocation
 python -c "
 import boto3
-client = boto3.client('bedrock-agentcore-runtime', region_name='us-east-1')
+client = boto3.client('bedrock-agentcore-runtime', region_name='eu-west-1')
 response = client.invoke_agent(
     agentId='<agent-id>',
     input={'prompt': 'Hello, test agent!'}
@@ -198,7 +208,7 @@ Configure CloudWatch logging and monitoring for AgentCore Runtime.
 **Commands**:
 ```powershell
 # Enable GenAI Observability
-aws cloudwatch enable-transaction-search --region us-east-1
+aws cloudwatch enable-transaction-search --region eu-west-1
 
 # View logs
 aws logs tail /aws/bedrock-agentcore/test-agent --follow
@@ -234,7 +244,7 @@ Create PowerShell script for automated AgentCore Runtime deployments.
 - `AgentName`: Name of the agent to deploy
 - `AgentPath`: Path to agent directory
 - `Version`: Image version tag
-- `Region`: AWS region (default: us-east-1)
+- `Region`: AWS region (default: eu-west-1)
 - `ModelId`: Bedrock model ID
 
 **Example Usage**:
@@ -243,7 +253,7 @@ Create PowerShell script for automated AgentCore Runtime deployments.
   -AgentName test-agent `
   -AgentPath agents/test-agent `
   -Version v1.0.0 `
-  -Region us-east-1
+  -Region eu-west-1
 ```
 
 ---

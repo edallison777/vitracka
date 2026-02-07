@@ -12,7 +12,8 @@ param(
     [string]$Version = "latest",
     
     [Parameter(Mandatory=$false)]
-    [string]$Region = "us-east-1",
+    [ValidateSet("eu-west-1")]
+    [string]$Region = "eu-west-1",  # ONLY eu-west-1 allowed - see AWS_REGION_POLICY.md
     
     [Parameter(Mandatory=$false)]
     [string]$ModelId = "anthropic.claude-3-5-sonnet-20241022-v2:0",
@@ -30,6 +31,17 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# ⚠️ CRITICAL: Validate AWS Region
+if ($Region -ne "eu-west-1") {
+    Write-Host ""
+    Write-Host "❌ DEPLOYMENT BLOCKED" -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Only eu-west-1 (Europe - Ireland) is allowed for deployments." -ForegroundColor Yellow
+    Write-Host "See AWS_REGION_POLICY.md for details." -ForegroundColor Yellow
+    Write-Host ""
+    exit 1
+}
+
 # Color functions
 function Write-Step { param($msg) Write-Host "`n=== $msg ===" -ForegroundColor Cyan }
 function Write-Success { param($msg) Write-Host "[OK] $msg" -ForegroundColor Green }
@@ -45,7 +57,7 @@ Write-Host ""
 Write-Host "Agent:       $AgentName" -ForegroundColor White
 Write-Host "Path:        $AgentPath" -ForegroundColor White
 Write-Host "Version:     $Version" -ForegroundColor White
-Write-Host "Region:      $Region" -ForegroundColor White
+Write-Host "Region:      $Region ✓ VERIFIED" -ForegroundColor Green
 Write-Host "Model:       $ModelId" -ForegroundColor White
 Write-Host "Deployment:  $DeploymentType" -ForegroundColor White
 if ($DeploymentType -eq "container") {

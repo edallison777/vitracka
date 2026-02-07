@@ -1,0 +1,201 @@
+{
+    "widgets": [
+        {
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [ocations", { "stat": "Sum", "label": "Total Invocations" } ]
+                    ],
+                    "region": "eu-west-1",
+                    "title": "Agent Invocations",
+                    "period": 300,
+                    "yAxis": {
+                        "left": {
+                            "min": 0
+                        }
+                    }
+                },
+                "x": 0,
+                "y": 0,
+                "width": 8,
+                "height": 6
+            },
+            {
+                "type": "metric",
+                "properties": {
+                    "metrics": [
+                        [
+                            "AWS/Bedrock",
+                            "InvocationLatency",
+                            {
+                                "stat": "Average",
+                                "label": "Avg Latency"
+                            }
+                        ],
+                        [
+                            "...",
+                            {
+                                "stat": "p50",
+                                "label": "p50"
+                            }
+                        ],
+                        [
+                            "...",
+                            {
+                                "stat": "p95",
+                                "label": "p95"
+                            }
+                        ],
+                        [
+                            "...",
+                            {
+                                "stat": "p99",
+                                "label": "p99"
+                            }
+                        ]
+                    ],
+                    "region": "eu-west-1",
+                    "title": "Response Latency (ms)",
+                    "period": 300,
+                    "yAxis": {
+                        "left": {
+                            "min": 0
+                        }
+                    }
+                },
+                "x": 8,
+                "y": 0,
+                "width": 8,
+                "height": 6
+            },
+            {
+                "type": "metric",
+                "properties": {
+                    "metrics": [
+                        [
+                            "AgentCore/TestAgent",
+                            "AgentErrorCount",
+                            {
+                                "stat": "Sum",
+                                "label": "Errors"
+                            }
+                        ]
+                    ],
+                    "region": "eu-west-1",
+                    "title": "Error Count",
+                    "period": 300,
+                    "yAxis": {
+                        "left": {
+                            "min": 0
+                        }
+                    }
+                },
+                "x": 16,
+                "y": 0,
+                "width": 8,
+                "height": 6
+            },
+            {
+                "type": "log",
+                "properties": {
+                    "query": "SOURCE '/aws/bedrock-agentcore/runtimes/agent-QVq5tY47wq-DEFAULT'\n| fields @timestamp, @message\n| filter @message like /Invocation completed/\n| parse @message /Invocation completed successfully \\((?<duration>[0-9.]+)s\\)/\n| stats avg(duration) as avg_duration, max(duration) as max_duration, min(duration) as min_duration by bin(5m)",
+                    "region": "eu-west-1",
+                    "title": "Performance Metrics (5min bins)",
+                    "stacked": false
+                },
+                "x": 0,
+                "y": 6,
+                "width": 12,
+                "height": 6
+            },
+            {
+                "type": "log",
+                "properties": {
+                    "query": "SOURCE '/aws/bedrock-agentcore/runtimes/agent-QVq5tY47wq-DEFAULT'\n| stats count() by bin(5m)",
+                    "region": "eu-west-1",
+                    "title": "Invocation Rate (5min)",
+                    "stacked": false
+                },
+                "x": 12,
+                "y": 6,
+                "width": 12,
+                "height": 6
+            },
+            {
+                "type": "log",
+                "properties": {
+                    "query": "SOURCE '/aws/bedrock-agentcore/runtimes/agent-QVq5tY47wq-DEFAULT'\n| filter @message like /ERROR/\n| fields @timestamp, @message\n| sort @timestamp desc\n| limit 20",
+                    "region": "eu-west-1",
+                    "title": "Recent Errors",
+                    "stacked": false
+                },
+                "x": 0,
+                "y": 12,
+                "width": 12,
+                "height": 6
+            },
+            {
+                "type": "log",
+                "properties": {
+                    "query": "SOURCE '/aws/bedrock-agentcore/runtimes/agent-QVq5tY47wq-DEFAULT'\n| fields @timestamp, @message\n| sort @timestamp desc\n| limit 20",
+                    "region": "eu-west-1",
+                    "title": "Recent Agent Logs",
+                    "stacked": false
+                },
+                "x": 12,
+                "y": 12,
+                "width": 12,
+                "height": 6
+            },
+            {
+                "type": "metric",
+                "properties": {
+                    "metrics": [
+                        [
+                            "AWS/Bedrock",
+                            "InputTokens",
+                            {
+                                "stat": "Sum",
+                                "label": "Input Tokens"
+                            }
+                        ],
+                        [
+                            ".",
+                            "OutputTokens",
+                            {
+                                "stat": "Sum",
+                                "label": "Output Tokens"
+                            }
+                        ]
+                    ],
+                    "region": "eu-west-1",
+                    "title": "Token Usage",
+                    "period": 300,
+                    "yAxis": {
+                        "left": {
+                            "min": 0
+                        }
+                    }
+                },
+                "x": 0,
+                "y": 18,
+                "width": 12,
+                "height": 6
+            },
+            {
+                "type": "log",
+                "properties": {
+                    "query": "SOURCE '/aws/bedrock-agentcore/runtimes/agent-QVq5tY47wq-DEFAULT'\n| fields @timestamp\n| stats count() as invocations by bin(1h)\n| sort @timestamp desc",
+                    "region": "eu-west-1",
+                    "title": "Hourly Invocation Trend",
+                    "stacked": false
+                },
+                "x": 12,
+                "y": 18,
+                "width": 12,
+                "height": 6
+            }
+        ]
+    }
+
+                        "AWS/Bedrock", "Inv
