@@ -1,0 +1,107 @@
+{
+    "widgets": [
+        {
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [
+                        "AWS/ECS",
+                        "CPUUtilization",
+                        {
+                            "stat": "Average",
+                            "label": "CPU Average"
+                        }
+                    ],
+                    [
+                        "...",
+                        {
+                            "stat": "Maximum",
+                            "label": "CPU Max"
+                        }
+                    ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "eu-west-1",
+                "title": "ECS CPU Utilization",
+                "period": 300,
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "max": 100
+                    }
+                }
+            }
+        },
+        {
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [
+                        "AWS/ECS",
+                        "MemoryUtilization",
+                        {
+                            "stat": "Average",
+                            "label": "Memory Average"
+                        }
+                    ],
+                    [
+                        "...",
+                        {
+                            "stat": "Maximum",
+                            "label": "Memory Max"
+                        }
+                    ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "eu-west-1",
+                "title": "ECS Memory Utilization",
+                "period": 300,
+                "yAxis": {
+                    "left": {
+                        "min": 0,
+                        "max": 100
+                    }
+                }
+            }
+        },
+        {
+            "type": "log",
+            "properties": {
+                "query": "SOURCE '/ecs/test-agent'\n| fields @timestamp, @message\n| filter @message like /ERROR/\n| sort @timestamp desc\n| limit 20",
+                "region": "eu-west-1",
+                "title": "Recent Errors",
+                "stacked": false
+            }
+        },
+        {
+            "type": "log",
+            "properties": {
+                "query": "SOURCE '/ecs/test-agent'\n| fields @timestamp\n| filter @message like /POST \\/test/\n| stats count() as RequestCount by bin(5m)",
+                "region": "eu-west-1",
+                "title": "Request Rate (5min intervals)",
+                "stacked": false
+            }
+        },
+        {
+            "type": "metric",
+            "properties": {
+                "metrics": [
+                    [
+                        "AWS/ECS",
+                        "RunningTaskCount",
+                        {
+                            "stat": "Average"
+                        }
+                    ]
+                ],
+                "view": "timeSeries",
+                "stacked": false,
+                "region": "eu-west-1",
+                "title": "Running Tasks",
+                "period": 60
+            }
+        }
+    ]
+}

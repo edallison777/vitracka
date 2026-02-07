@@ -1,0 +1,60 @@
+﻿# Dependencies
+node_modules/
+package-lock.json
+
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# AgentCore
+**/.bedrock_agentcore/*
+.bedrock_agentcore.yaml
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+dist/
+build/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Secrets
+*.pem
+*.key
+secrets/
+
+# AWS
+.aws/
+
+# Test
+coverage/
+.nyc_output/
+
+# Temporary
+*.tmp
+*.temp

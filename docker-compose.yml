@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  # Node.js Backend API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=vitracka
+      - DB_USER=postgres
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - API_SECRET_KEY=${API_SECRET_KEY}
+      - COACH_AGENT_URL=http://coach-agent:8001
+    depends_on:
+      - postgres
+      - coach-agent
+    networks:
+      - vitracka-network
+
+  # Python Coach Companion Agent
+  coach-agent:
+    build:
+      context: ./agents/coach-companion
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - AWS_REGION=${AWS_REGION}
+      - AWS_BEDROCK_API_KEY=${AWS_BEDROCK_API_KEY}
+      - PORT=8001
+      - LOG_LEVEL=INFO
+    networks:
+      - vitracka-network
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=vitracka
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - vitracka-network
+
+networks:
+  vitracka-network:
+    driver: bridge
+
+volumes:
+  postgres-data:

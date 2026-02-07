@@ -1,0 +1,197 @@
+# Vitracka Deployment Configuration
+# This file defines deployment strategies and configurations for different environments
+
+environments:
+  development:
+    aws_region: "eu-west-2"
+    deployment_strategy: "rolling"
+    auto_deploy: true
+    approval_required: false
+    health_check_timeout: 300
+    rollback_on_failure: true
+    terraform_backend:
+      bucket: "vitracka-terraform-state-dev"
+      key: "terraform/development.tfstate"
+      dynamodb_table: "vitracka-terraform-locks-dev"
+    monitoring:
+      enabled: true
+      alert_threshold: 5  # minutes
+      cost_threshold: 50  # USD per day
+    blue_green:
+      enabled: false  # Use rolling deployment for dev
+    
+  staging:
+    aws_region: "eu-west-2"
+    deployment_strategy: "blue_green"
+    auto_deploy: false
+    approval_required: true
+    health_check_timeout: 600
+    rollback_on_failure: true
+    terraform_backend:
+      bucket: "vitracka-terraform-state-staging"
+      key: "terraform/staging.tfstate"
+      dynamodb_table: "vitracka-terraform-locks-staging"
+    monitoring:
+      enabled: true
+      alert_threshold: 3  # minutes
+      cost_threshold: 100  # USD per day
+    blue_green:
+      enabled: true
+      traffic_switch_delay: 60  # seconds
+      cleanup_delay: 3600  # seconds (1 hour)
+      
+  production:
+    aws_region: "eu-west-2"
+    deployment_strategy: "blue_green"
+    auto_deploy: false
+    approval_required: true
+    health_check_timeout: 900
+    rollback_on_failure: true
+    terraform_backend:
+      bucket: "vitracka-terraform-state-prod"
+      key: "terraform/production.tfstate"
+      dynamodb_table: "vitracka-terraform-locks-prod"
+    monitoring:
+      enabled: true
+      alert_threshold: 1  # minute
+      cost_threshold: 500  # USD per day
+    blue_green:
+      enabled: true
+      traffic_switch_delay: 300  # seconds (5 minutes)
+      cleanup_delay: 86400  # seconds (24 hours)
+      canary_deployment: true
+      canary_percentage: 10
+
+# Global deployment settings
+global:
+  terraform_version: "1.6.0"
+  aws_cli_version: "2.x"
+  notification_channels:
+    slack:
+      enabled: true
+      webhook_url_secret: "SLACK_WEBHOOK_URL"
+      channels:
+        - "#vitracka-deployments"
+        - "#vitracka-alerts"
+    email:
+      enabled: true
+      recipients:
+        - "devops@vitracka.com"
+        - "team@vitracka.com"
+  
+  # Security scanning
+  security:
+    tfsec_enabled: true
+    checkov_enabled: true
+    fail_on_high_severity: true
+    
+  # Cost management
+  cost_management:
+    daily_reports: true
+    weekly_reports: true
+    budget_alerts: true
+    
+  # Backup and disaster recovery
+  backup:
+    terraform_state_backup: true
+    database_backup: true
+    retention_days: 30
+
+# Health check endpoints
+health_checks:
+  endpoints:
+    - path: "/health"
+      expected_status: 200
+      timeout: 30
+    - path: "/health/database"
+      expected_status: 200
+      timeout: 60
+    - path: "/health/agents"
+      expected_status: 200
+      timeout: 45
+      
+# Smoke tests
+smoke_tests:
+  - name: "API Health Check"
+    endpoint: "/health"
+    method: "GET"
+    expected_status: 200
+    
+  - name: "Authentication Test"
+    endpoint: "/auth/health"
+    method: "GET"
+    expected_status: 200
+    
+  - name: "Database Connectivity"
+    endpoint: "/health/database"
+    method: "GET"
+    expected_status: 200
+    
+  - name: "Agent Services"
+    endpoint: "/health/agents"
+    method: "GET"
+    expected_status: 200
+
+# Rollback configuration
+rollback:
+  automatic_triggers:
+    - health_check_failure
+    - high_error_rate
+    - performance_degradation
+  manual_approval_required: true
+  max_rollback_attempts: 3
+  
+# Monitoring and alerting
+monitoring:
+  metrics:
+    - name: "response_time"
+      threshold: 2000  # milliseconds
+      duration: 300    # seconds
+      
+    - name: "error_rate"
+      threshold: 5     # percentage
+      duration: 180    # seconds
+      
+    - name: "cpu_utilization"
+      threshold: 80    # percentage
+      duration: 600    # seconds
+      
+    - name: "memory_utilization"
+      threshold: 85    # percentage
+      duration: 600    # seconds
+      
+  alerts:
+    - name: "deployment_failure"
+      severity: "critical"
+      channels: ["slack", "email"]
+      
+    - name: "health_check_failure"
+      severity: "high"
+      channels: ["slack"]
+      
+    - name: "cost_threshold_exceeded"
+      severity: "medium"
+      channels: ["email"]
+
+# Infrastructure validation
+validation:
+  terraform:
+    format_check: true
+    validate: true
+    plan: true
+    security_scan: true
+    
+  aws:
+    resource_tagging: true
+    cost_estimation: true
+    security_groups: true
+    
+# Multi-region configuration (for future expansion)
+multi_region:
+  enabled: false
+  primary_region: "eu-west-2"
+  secondary_regions:
+    - "us-east-1"
+    - "ap-southeast-2"
+  replication_strategy: "active_passive"
+  failover_automation: false

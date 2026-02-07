@@ -1,0 +1,52 @@
+const i18n = {
+    use: jest.fn(() => i18n),
+    init: jest.fn(() => Promise.resolve()),
+    changeLanguage: jest.fn(() => Promise.resolve()),
+    getFixedT: jest.fn(() => (key) => key),
+    t: jest.fn((key) => key),
+    exists: jest.fn(() => true),
+    addResource: jest.fn(),
+    addResources: jest.fn(),
+    addResourceBundle: jest.fn(),
+    removeResourceBundle: jest.fn(),
+    hasResourceBundle: jest.fn(() => true),
+    getResourceBundle: jest.fn(() => ({})),
+    getResource: jest.fn(() => 'test'),
+    loadLanguages: jest.fn(() => Promise.resolve()),
+    loadNamespaces: jest.fn(() => Promise.resolve()),
+    loadResources: jest.fn(() => Promise.resolve()),
+    setDefaultNamespace: jest.fn(),
+    dir: jest.fn(() => 'ltr'),
+    format: jest.fn((value) => value),
+    language: 'en',
+    languages: ['en'],
+    resolvedLanguage: 'en',
+    isInitialized: true,
+    hasLoadedNamespace: jest.fn(() => true),
+    on: jest.fn(),
+    off: jest.fn(),
+    emit: jest.fn(),
+    store: {
+        on: jest.fn(),
+        off: jest.fn(),
+    },
+    services: {
+        resourceStore: {
+            data: {},
+        },
+        languageUtils: {
+            formatLanguageCode: jest.fn((code) => code),
+            isWhitelisted: jest.fn(() => true),
+        },
+        pluralResolver: {},
+        interpolator: {},
+        backendConnector: {},
+        i18nFormat: {},
+        utils: {
+            hasLoadedNamespace: jest.fn(() => true),
+        },
+    },
+    options: {},
+};
+
+module.exports = i18n;

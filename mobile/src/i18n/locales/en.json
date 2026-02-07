@@ -1,0 +1,247 @@
+{
+    "common": {
+        "save": "Save",
+        "cancel": "Cancel",
+        "continue": "Continue",
+        "back": "Back",
+        "next": "Next",
+        "done": "Done",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "retry": "Retry",
+        "close": "Close",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirm": "Confirm",
+        "yes": "Yes",
+        "no": "No"
+    },
+    "auth": {
+        "login": "Log In",
+        "register": "Sign Up",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "forgotPassword": "Forgot Password?",
+        "resetPassword": "Reset Password",
+        "loginWithGoogle": "Continue with Google",
+        "loginWithFacebook": "Continue with Facebook",
+        "biometricLogin": "Use Biometric Login",
+        "createAccount": "Create Account",
+        "alreadyHaveAccount": "Already have an account?",
+        "dontHaveAccount": "Don't have an account?",
+        "loginError": "Login failed. Please check your credentials.",
+        "registerError": "Registration failed. Please try again.",
+        "passwordResetSent": "Password reset email sent.",
+        "weakPassword": "Password is too weak. Please choose a stronger password."
+    },
+    "onboarding": {
+        "welcome": "Welcome to Vitracka",
+        "subtitle": "Your AI-powered weight management companion",
+        "getStarted": "Get Started",
+        "goals": {
+            "title": "What's Your Goal?",
+            "weightLoss": "Lose Weight",
+            "maintenance": "Maintain Weight",
+            "transition": "Transition from Medication",
+            "targetWeight": "Target Weight",
+            "timeframe": "Timeframe",
+            "weeklyGoal": "Weekly Goal"
+        },
+        "preferences": {
+            "title": "Coaching Preferences",
+            "coachingStyle": "Coaching Style",
+            "gentle": "Gentle & Supportive",
+            "pragmatic": "Practical & Direct",
+            "upbeat": "Enthusiastic & Motivating",
+            "structured": "Organized & Systematic",
+            "gamification": "Gamification Level",
+            "minimal": "Minimal",
+            "moderate": "Moderate",
+            "high": "High",
+            "notifications": "Notification Preferences",
+            "daily": "Daily",
+            "weekly": "Weekly",
+            "custom": "Custom"
+        },
+        "medical": {
+            "title": "Medical Context",
+            "subtitle": "This helps us provide better support (optional)",
+            "glp1Medication": "Are you taking GLP-1 medication?",
+            "clinicianGuidance": "Do you have clinician guidance?",
+            "medicationDetails": "Medication details (optional)",
+            "disclaimer": "Vitracka does not provide medical advice. Always consult your healthcare provider."
+        },
+        "completion": {
+            "title": "You're All Set!",
+            "subtitle": "Your personalized coaching profile is ready",
+            "startJourney": "Start Your Journey"
+        }
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "greeting": "Good {{timeOfDay}}, {{name}}!",
+        "todaysWeight": "Today's Weight",
+        "logWeight": "Log Weight",
+        "progress": "Progress",
+        "weeklyTrend": "Weekly Trend",
+        "monthlyTrend": "Monthly Trend",
+        "coaching": "Today's Coaching",
+        "achievements": "Achievements",
+        "quickActions": "Quick Actions",
+        "logMeal": "Log Meal",
+        "viewPlan": "View Plan",
+        "settings": "Settings"
+    },
+    "weight": {
+        "title": "Weight Tracking",
+        "currentWeight": "Current Weight",
+        "targetWeight": "Target Weight",
+        "enterWeight": "Enter your weight",
+        "selectUnit": "Select unit",
+        "kg": "kg",
+        "lbs": "lbs",
+        "notes": "Notes (optional)",
+        "mood": "How are you feeling?",
+        "great": "Great",
+        "good": "Good",
+        "okay": "Okay",
+        "struggling": "Struggling",
+        "confidence": "Confidence Level",
+        "weightLogged": "Weight logged successfully",
+        "trends": "Weight Trends",
+        "sevenDayAverage": "7-day average",
+        "thirtyDayAverage": "30-day average",
+        "progressChart": "Progress Chart",
+        "noDataYet": "No weight data yet. Log your first entry!"
+    },
+    "plan": {
+        "title": "Eating Plan",
+        "dailyTarget": "Daily Target",
+        "todaysProgress": "Today's Progress",
+        "logMeal": "Log Meal",
+        "mealHistory": "Meal History",
+        "adherence": "Adherence",
+        "planType": {
+            "calorie": "Calorie-based",
+            "points": "Points-based",
+            "plate": "Plate method",
+            "custom": "Custom"
+        },
+        "mealTypes": {
+            "breakfast": "Breakfast",
+            "lunch": "Lunch",
+            "dinner": "Dinner",
+            "snack": "Snack"
+        },
+        "breach": {
+            "title": "Plan Deviation",
+            "message": "It's okay! Everyone has challenging days. What matters is getting back on track.",
+            "logBreach": "Log Deviation",
+            "recovery": "Recovery Tips",
+            "backOnTrack": "Back on Track"
+        }
+    },
+    "progress": {
+        "title": "Progress",
+        "overview": "Overview",
+        "weightLoss": "Weight Loss",
+        "consistency": "Consistency",
+        "achievements": "Achievements",
+        "insights": "Insights",
+        "weeklyReport": "Weekly Report",
+        "monthlyReport": "Monthly Report",
+        "shareProgress": "Share Progress",
+        "exportData": "Export Data"
+    },
+    "settings": {
+        "title": "Settings",
+        "profile": "Profile",
+        "preferences": "Preferences",
+        "notifications": "Notifications",
+        "privacy": "Privacy & Data",
+        "support": "Support",
+        "about": "About",
+        "language": "Language",
+        "currency": "Currency",
+        "timezone": "Timezone",
+        "units": "Units",
+        "dateFormat": "Date Format",
+        "timeFormat": "Time Format",
+        "coachingStyle": "Coaching Style",
+        "notificationSettings": "Notification Settings",
+        "quietHours": "Quiet Hours",
+        "dataExport": "Export My Data",
+        "deleteAccount": "Delete Account",
+        "logout": "Log Out",
+        "version": "Version {{version}}"
+    },
+    "coaching": {
+        "dailyTip": "Daily Tip",
+        "encouragement": "Encouragement",
+        "insights": "Insights",
+        "challenges": "Challenges",
+        "safetyReminder": "Remember: Vitracka provides support, not medical advice. Consult your healthcare provider for medical concerns.",
+        "glp1Support": {
+            "title": "GLP-1 Support",
+            "nutritionFocus": "Focus on nutrition quality, not just quantity",
+            "musclePreservation": "Maintain protein intake for muscle preservation",
+            "safeRate": "Aim for gradual, sustainable weight loss"
+        }
+    },
+    "safety": {
+        "crisis": {
+            "title": "Crisis Support",
+            "message": "If you're having thoughts of self-harm or suicide, please reach out for help immediately.",
+            "emergencyServices": "Emergency Services",
+            "crisisHotline": "Crisis Hotline",
+            "textSupport": "Text Support"
+        },
+        "eatingDisorder": {
+            "title": "Eating Disorder Support",
+            "message": "If you're struggling with eating disorder thoughts or behaviors, professional help is available.",
+            "findSupport": "Find Support",
+            "resources": "Resources"
+        },
+        "medical": {
+            "title": "Medical Advice Disclaimer",
+            "message": "Vitracka does not provide medical advice, diagnosis, or treatment. Please consult your healthcare provider for medical concerns.",
+            "findProvider": "Find Healthcare Provider"
+        }
+    },
+    "errors": {
+        "networkError": "Network error. Please check your connection.",
+        "serverError": "Server error. Please try again later.",
+        "validationError": "Please check your input and try again.",
+        "authenticationError": "Authentication failed. Please log in again.",
+        "permissionError": "Permission denied. Please check your settings.",
+        "unknownError": "An unexpected error occurred. Please try again."
+    },
+    "units": {
+        "weight": {
+            "kg": "kg",
+            "lbs": "lbs"
+        },
+        "height": {
+            "cm": "cm",
+            "ft": "ft"
+        },
+        "temperature": {
+            "celsius": "°C",
+            "fahrenheit": "°F"
+        }
+    },
+    "currency": {
+        "GBP": "£",
+        "USD": "$",
+        "EUR": "€",
+        "CAD": "C$",
+        "AUD": "A$"
+    },
+    "timeOfDay": {
+        "morning": "morning",
+        "afternoon": "afternoon",
+        "evening": "evening"
+    }
+}

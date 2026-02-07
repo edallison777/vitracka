@@ -1,0 +1,363 @@
+# Vitracka Weight Management System - Production Monitoring Configuration
+# This file defines comprehensive monitoring, alerting, and incident response procedures
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vitracka-monitoring-config
+  namespace: production
+data:
+  # CloudWatch Dashboard Configuration
+  dashboard-config.json: |
+    {
+      "widgets": [
+        {
+          "type": "metric",
+          "properties": {
+            "metrics": [
+              ["AWS/ECS", "CPUUtilization", "ServiceName", "vitracka-weight-management"],
+              ["AWS/ECS", "MemoryUtilization", "ServiceName", "vitracka-weight-management"]
+            ],
+            "period": 300,
+            "stat": "Average",
+            "region": "eu-west-2",
+            "title": "ECS Resource Utilization"
+          }
+        },
+        {
+          "type": "metric",
+          "properties": {
+            "metrics": [
+              ["AWS/ApplicationELB", "RequestCount", "LoadBalancer", "vitracka-alb"],
+              ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", "vitracka-alb"],
+              ["AWS/ApplicationELB", "HTTPCode_Target_4XX_Count", "LoadBalancer", "vitracka-alb"],
+              ["AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", "LoadBalancer", "vitracka-alb"]
+            ],
+            "period": 300,
+            "stat": "Sum",
+            "region": "eu-west-2",
+            "title": "Application Load Balancer Metrics"
+          }
+        },
+        {
+          "type": "metric",
+          "properties": {
+            "metrics": [
+              ["AWS/RDS", "CPUUtilization", "DBInstanceIdentifier", "vitracka-weight-management-db-prod"],
+              ["AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", "vitracka-weight-management-db-prod"],
+              ["AWS/RDS", "ReadLatency", "DBInstanceIdentifier", "vitracka-weight-management-db-prod"],
+              ["AWS/RDS", "WriteLatency", "DBInstanceIdentifier", "vitracka-weight-management-db-prod"]
+            ],
+            "period": 300,
+            "stat": "Average",
+            "region": "eu-west-2",
+            "title": "RDS Database Metrics"
+          }
+        },
+        {
+          "type": "log",
+          "properties": {
+            "query": "SOURCE '/aws/ecs/vitracka-weight-management' | fields @timestamp, @message | filter @message like /ERROR/ | sort @timestamp desc | limit 100",
+            "region": "eu-west-2",
+            "title": "Recent Error Logs"
+          }
+        },
+        {
+          "type": "metric",
+          "properties": {
+            "metrics": [
+              ["Vitracka/Safety", "SafetyInterventions", "Environment", "production"],
+              ["Vitracka/Safety", "CriticalInterventions", "Environment", "production"],
+              ["Vitracka/Safety", "MedicalBoundaryRedirects", "Environment", "production"]
+            ],
+            "period": 300,
+            "stat": "Sum",
+            "region": "eu-west-2",
+            "title": "Safety Mechanism Metrics"
+          }
+        },
+        {
+          "type": "metric",
+          "properties": {
+            "metrics": [
+              ["Vitracka/Business", "ActiveUsers", "Environment", "production"],
+              ["Vitracka/Business", "WeightEntries", "Environment", "production"],
+              ["Vitracka/Business", "CoachingInteractions", "Environment", "production"],
+              ["Vitracka/Business", "BreachRecoveryEvents", "Environment", "production"]
+            ],
+            "period": 300,
+            "stat": "Sum",
+            "region": "eu-west-2",
+            "title": "Business Metrics"
+          }
+        }
+      ]
+    }
+
+  # Alert Configuration
+  alerts-config.yml: |
+    alerts:
+      # High-Priority Alerts (Immediate Response Required)
+      - name: "Application Down"
+        condition: "HealthCheck == 0"
+        threshold: 1
+        duration: "2m"
+        severity: "critical"
+        channels: ["pagerduty", "slack-critical", "email-oncall"]
+        description: "Application health check is failing"
+        runbook: "https://docs.vitracka.com/runbooks/application-down"
+        
+      - name: "Safety Sentinel Failure"
+        condition: "SafetySentinelErrors > 0"
+        threshold: 1
+        duration: "1m"
+        severity: "critical"
+        channels: ["pagerduty", "slack-critical", "email-oncall", "sms-oncall"]
+        description: "Safety Sentinel service is experiencing errors"
+        runbook: "https://docs.vitracka.com/runbooks/safety-sentinel-failure"
+        
+      - name: "Database Connection Failure"
+        condition: "DatabaseConnections == 0"
+        threshold: 1
+        duration: "2m"
+        severity: "critical"
+        channels: ["pagerduty", "slack-critical", "email-oncall"]
+        description: "Database connections have dropped to zero"
+        runbook: "https://docs.vitracka.com/runbooks/database-failure"
+        
+      - name: "High Error Rate"
+        condition: "ErrorRate > 5%"
+        threshold: 5
+        duration: "5m"
+        severity: "critical"
+        channels: ["pagerduty", "slack-critical", "email-oncall"]
+        description: "Application error rate is above 5%"
+        runbook: "https://docs.vitracka.com/runbooks/high-error-rate"
+        
+      # Medium-Priority Alerts (Response within 30 minutes)
+      - name: "High CPU Usage"
+        condition: "CPUUtilization > 80%"
+        threshold: 80
+        duration: "10m"
+        severity: "warning"
+        channels: ["slack-alerts", "email-team"]
+        description: "CPU utilization is consistently high"
+        runbook: "https://docs.vitracka.com/runbooks/high-cpu"
+        
+      - name: "High Memory Usage"
+        condition: "MemoryUtilization > 85%"
+        threshold: 85
+        duration: "10m"
+        severity: "warning"
+        channels: ["slack-alerts", "email-team"]
+        description: "Memory utilization is consistently high"
+        runbook: "https://docs.vitracka.com/runbooks/high-memory"
+        
+      - name: "Slow Response Time"
+        condition: "ResponseTime > 2000ms"
+        threshold: 2000
+        duration: "5m"
+        severity: "warning"
+        channels: ["slack-alerts", "email-team"]
+        description: "Application response time is slow"
+        runbook: "https://docs.vitracka.com/runbooks/slow-response"
+        
+      - name: "High Safety Intervention Rate"
+        condition: "SafetyInterventions > 10 per hour"
+        threshold: 10
+        duration: "1h"
+        severity: "warning"
+        channels: ["slack-safety", "email-safety-team"]
+        description: "Unusually high rate of safety interventions"
+        runbook: "https://docs.vitracka.com/runbooks/high-safety-interventions"
+        
+      # Low-Priority Alerts (Response within 4 hours)
+      - name: "Disk Space Warning"
+        condition: "DiskUtilization > 75%"
+        threshold: 75
+        duration: "30m"
+        severity: "info"
+        channels: ["slack-alerts"]
+        description: "Disk space is getting low"
+        runbook: "https://docs.vitracka.com/runbooks/disk-space"
+        
+      - name: "Backup Failure"
+        condition: "BackupSuccess == 0"
+        threshold: 1
+        duration: "1h"
+        severity: "warning"
+        channels: ["slack-alerts", "email-team"]
+        description: "Scheduled backup has failed"
+        runbook: "https://docs.vitracka.com/runbooks/backup-failure"
+
+  # Incident Response Procedures
+  incident-response.yml: |
+    incident_response:
+      # Severity Levels
+      severity_levels:
+        critical:
+          response_time: "5 minutes"
+          escalation_time: "15 minutes"
+          stakeholders: ["oncall-engineer", "team-lead", "product-manager", "cto"]
+          communication_channels: ["pagerduty", "slack-critical", "email-executives"]
+          
+        high:
+          response_time: "15 minutes"
+          escalation_time: "30 minutes"
+          stakeholders: ["oncall-engineer", "team-lead"]
+          communication_channels: ["slack-alerts", "email-team"]
+          
+        medium:
+          response_time: "30 minutes"
+          escalation_time: "2 hours"
+          stakeholders: ["assigned-engineer"]
+          communication_channels: ["slack-alerts"]
+          
+        low:
+          response_time: "4 hours"
+          escalation_time: "24 hours"
+          stakeholders: ["assigned-engineer"]
+          communication_channels: ["ticket-system"]
+      
+      # Incident Types and Procedures
+      incident_types:
+        safety_sentinel_failure:
+          severity: "critical"
+          immediate_actions:
+            - "Activate emergency safety mode"
+            - "Disable user interactions until safety is restored"
+            - "Notify safety team and clinical advisors"
+            - "Begin manual safety monitoring"
+          investigation_steps:
+            - "Check safety sentinel service logs"
+            - "Verify safety database integrity"
+            - "Test safety trigger detection"
+            - "Validate safety response generation"
+          recovery_steps:
+            - "Restore safety sentinel from backup"
+            - "Run comprehensive safety tests"
+            - "Gradually re-enable user interactions"
+            - "Monitor safety metrics closely"
+            
+        application_outage:
+          severity: "critical"
+          immediate_actions:
+            - "Check application health endpoints"
+            - "Verify load balancer status"
+            - "Check container orchestration status"
+            - "Initiate rollback if necessary"
+          investigation_steps:
+            - "Review application logs"
+            - "Check infrastructure metrics"
+            - "Verify database connectivity"
+            - "Check external service dependencies"
+          recovery_steps:
+            - "Restart failed services"
+            - "Scale up if resource constrained"
+            - "Apply hotfixes if code issue identified"
+            - "Communicate with users about restoration"
+            
+        database_issues:
+          severity: "high"
+          immediate_actions:
+            - "Check database connectivity"
+            - "Verify database server status"
+            - "Check connection pool status"
+            - "Enable read-only mode if necessary"
+          investigation_steps:
+            - "Review database logs"
+            - "Check query performance"
+            - "Verify backup integrity"
+            - "Check disk space and resources"
+          recovery_steps:
+            - "Optimize slow queries"
+            - "Scale database resources"
+            - "Restore from backup if corrupted"
+            - "Update connection pool settings"
+            
+        security_incident:
+          severity: "critical"
+          immediate_actions:
+            - "Isolate affected systems"
+            - "Preserve evidence"
+            - "Notify security team"
+            - "Begin security assessment"
+          investigation_steps:
+            - "Analyze security logs"
+            - "Check for data breaches"
+            - "Identify attack vectors"
+            - "Assess impact scope"
+          recovery_steps:
+            - "Patch security vulnerabilities"
+            - "Reset compromised credentials"
+            - "Notify affected users if required"
+            - "Implement additional security measures"
+
+  # Runbook Templates
+  runbook-template.md: |
+    # Runbook: [Incident Type]
+    
+    ## Overview
+    Brief description of the incident type and its impact.
+    
+    ## Symptoms
+    - List of symptoms that indicate this incident
+    - Monitoring alerts that would fire
+    - User-reported issues
+    
+    ## Immediate Actions (First 5 minutes)
+    1. Step-by-step immediate response
+    2. Safety measures to implement
+    3. Stakeholders to notify
+    
+    ## Investigation Steps
+    1. Where to look for root cause
+    2. Logs to check
+    3. Metrics to analyze
+    4. Tests to run
+    
+    ## Resolution Steps
+    1. How to fix the issue
+    2. Verification steps
+    3. Monitoring to watch
+    
+    ## Prevention
+    - How to prevent this incident in the future
+    - Monitoring improvements
+    - Code or infrastructure changes needed
+    
+    ## Post-Incident
+    - Documentation to update
+    - Metrics to review
+    - Follow-up actions required
+
+  # Health Check Configuration
+  health-checks.yml: |
+    health_checks:
+      application:
+        endpoint: "/health"
+        interval: "30s"
+        timeout: "10s"
+        healthy_threshold: 2
+        unhealthy_threshold: 3
+        
+      database:
+        endpoint: "/health/database"
+        interval: "60s"
+        timeout: "15s"
+        healthy_threshold: 2
+        unhealthy_threshold: 2
+        
+      safety_sentinel:
+        endpoint: "/health/safety"
+        interval: "15s"
+        timeout: "5s"
+        healthy_threshold: 1
+        unhealthy_threshold: 1
+        
+      external_services:
+        endpoint: "/health/external"
+        interval: "120s"
+        timeout: "30s"
+        healthy_threshold: 2
+        unhealthy_threshold: 3

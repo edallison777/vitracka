@@ -1,0 +1,47 @@
+{
+    "family": "test-agent",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512",
+    "runtimePlatform": {
+        "cpuArchitecture": "ARM64",
+        "operatingSystemFamily": "LINUX"
+    },
+    "executionRoleArn": "arn:aws:iam::732231126129:role/VitrackaTestAgentExecutionRole",
+    "taskRoleArn": "arn:aws:iam::732231126129:role/VitrackaTestAgentTaskRole",
+    "containerDefinitions": [
+        {
+            "name": "test-agent",
+            "image": "732231126129.dkr.ecr.eu-west-1.amazonaws.com/vitracka/test-agent:latest",
+            "portMappings": [
+                {
+                    "containerPort": 8001,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {
+                    "name": "AWS_REGION",
+                    "value": "eu-west-1"
+                },
+                {
+                    "name": "PORT",
+                    "value": "8001"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/test-agent",
+                    "awslogs-region": "eu-west-1",
+                    "awslogs-stream-prefix": "ecs",
+                    "awslogs-create-group": "true"
+                }
+            },
+            "essential": true
+        }
+    ]
+}
