@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-02-08T10:09:30.568150",
+  "agent_arn": "arn:aws:bedrock-agentcore:eu-west-1:732231126129:runtime/coach_companion-0ZUOP04U5z",
+  "region": "eu-west-1",
+  "config": {
+    "concurrent_users": 100,
+    "requests_per_user": 1,
+    "total_requests": 100
+  },
+  "results": {
+    "total_requests": 100,
+    "successful": 100,
+    "failed": 0,
+    "success_rate": 100.0,
+    "avg_response_time": 36930.021550655365,
+    "min_response_time": 9628.986358642578,
+    "max_response_time": 120344.18821334839,
+    "p50_response_time": 22170.180559158325,
+    "p95_response_time": 91283.12182426453,
+    "p99_response_time": 120344.18821334839,
+    "total_duration": 121.14575099945068,
+    "requests_per_second": 0.8254519797434202
+  },
+  "errors": []
+}

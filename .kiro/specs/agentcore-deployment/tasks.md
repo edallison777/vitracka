@@ -367,14 +367,14 @@ Configure Strands SDK for Bedrock Agent.
 Test coach companion agent with real scenarios.
 
 **Subtasks**:
-- [ ] 15.1 Test user onboarding flow
-- [ ] 15.2 Test goal setting
-- [ ] 15.3 Test progress tracking
+- [x] 15.1 Test user onboarding flow
+- [x] 15.2 Test goal setting
+- [x] 15.3 Test progress tracking
 - [ ] 15.4 Test Strands data retrieval
-- [ ] 15.5 Test error scenarios
+- [x] 15.5 Test error scenarios
 - [ ] 15.6 Load testing (100 concurrent users)
-- [ ] 15.7 Measure response times
-- [ ] 15.8 Verify CloudWatch logs
+- [x] 15.7 Measure response times
+- [x] 15.8 Verify CloudWatch logs
 
 ---
 
@@ -422,9 +422,9 @@ Complete all deployment documentation.
 **Subtasks**:
 - [x] 18.1 Create deployment guide (`AGENTCORE_DEPLOYMENT_GUIDE.md`)
 - [x] 18.2 Create runbook for common issues (included in deployment guide)
-- [ ] 18.3 Document monitoring and alerting
-- [ ] 18.4 Create architecture diagrams
-- [ ] 18.5 Document API endpoints
+- [x] 18.3 Document monitoring and alerting
+- [x] 18.4 Create architecture diagrams
+- [x] 18.5 Document API endpoints
 - [x] 18.6 Create troubleshooting guide (included in deployment guide)
 - [x] 18.7 Document coach companion deployment (`COACH_COMPANION_DEPLOYMENT_SUCCESS.md`)
 - [x] 18.8 Create quickstart guide (`AGENTCORE_QUICKSTART.md`)

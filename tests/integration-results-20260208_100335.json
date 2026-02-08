@@ -1,0 +1,139 @@
+{
+  "timestamp": "2026-02-08T10:03:35.628627",
+  "agent_arn": "arn:aws:bedrock-agentcore:eu-west-1:732231126129:runtime/coach_companion-0ZUOP04U5z",
+  "region": "eu-west-1",
+  "summary": {
+    "total": 21,
+    "passed": 18,
+    "failed": 3,
+    "success_rate": 85.71428571428571
+  },
+  "tests": [
+    {
+      "name": "Basic Invocation",
+      "passed": true,
+      "message": "",
+      "duration_ms": 5026.015996932983
+    },
+    {
+      "name": "Onboarding - introduction",
+      "passed": true,
+      "message": "",
+      "duration_ms": 4025.247812271118
+    },
+    {
+      "name": "Onboarding - goal_statement",
+      "passed": true,
+      "message": "",
+      "duration_ms": 2542.7756309509277
+    },
+    {
+      "name": "Onboarding - medication_disclosure",
+      "passed": true,
+      "message": "",
+      "duration_ms": 2558.4065914154053
+    },
+    {
+      "name": "Onboarding - coaching_style",
+      "passed": true,
+      "message": "",
+      "duration_ms": 3286.1785888671875
+    },
+    {
+      "name": "Goal Setting - realistic_goal",
+      "passed": true,
+      "message": "",
+      "duration_ms": 5636.570453643799
+    },
+    {
+      "name": "Goal Setting - maintenance_goal",
+      "passed": true,
+      "message": "",
+      "duration_ms": 2447.3538398742676
+    },
+    {
+      "name": "Goal Setting - transition_goal",
+      "passed": true,
+      "message": "",
+      "duration_ms": 4256.695747375488
+    },
+    {
+      "name": "Goal Setting - unrealistic_goal",
+      "passed": true,
+      "message": "",
+      "duration_ms": 2623.4562397003174
+    },
+    {
+      "name": "Progress - positive_progress",
+      "passed": true,
+      "message": "",
+      "duration_ms": 4823.039293289185
+    },
+    {
+      "name": "Progress - setback",
+      "passed": true,
+      "message": "",
+      "duration_ms": 2351.5756130218506
+    },
+    {
+      "name": "Progress - plateau",
+      "passed": true,
+      "message": "",
+      "duration_ms": 2493.720769882202
+    },
+    {
+      "name": "Progress - non_scale_victory",
+      "passed": true,
+      "message": "",
+      "duration_ms": 2505.702257156372
+    },
+    {
+      "name": "Error - empty_input",
+      "passed": true,
+      "message": "Skipped - validation expected",
+      "duration_ms": 0
+    },
+    {
+      "name": "Error - very_long_input",
+      "passed": true,
+      "message": "",
+      "duration_ms": 5738.171815872192
+    },
+    {
+      "name": "Error - emoji_only",
+      "passed": true,
+      "message": "",
+      "duration_ms": 6879.003286361694
+    },
+    {
+      "name": "Error - off_topic",
+      "passed": true,
+      "message": "",
+      "duration_ms": 5683.614253997803
+    },
+    {
+      "name": "Response Time - Average",
+      "passed": false,
+      "message": "10090ms > 5000ms",
+      "duration_ms": 0
+    },
+    {
+      "name": "Response Time - Max",
+      "passed": false,
+      "message": "26066ms > 10000ms",
+      "duration_ms": 0
+    },
+    {
+      "name": "CloudWatch Logs - Recent",
+      "passed": false,
+      "message": "Last event 29509084 min ago",
+      "duration_ms": 0
+    },
+    {
+      "name": "CloudWatch Logs - Exists",
+      "passed": true,
+      "message": "",
+      "duration_ms": 0
+    }
+  ]
+}

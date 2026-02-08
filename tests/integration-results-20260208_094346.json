@@ -1,0 +1,133 @@
+{
+  "timestamp": "2026-02-08T09:43:46.924190",
+  "agent_arn": "arn:aws:bedrock-agentcore:eu-west-1:732231126129:runtime/coach_companion-0ZUOP04U5z",
+  "region": "eu-west-1",
+  "summary": {
+    "total": 20,
+    "passed": 5,
+    "failed": 15,
+    "success_rate": 25.0
+  },
+  "tests": [
+    {
+      "name": "Basic Invocation",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 24, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Onboarding - introduction",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 24, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Onboarding - goal_statement",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 24, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Onboarding - medication_disclosure",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 24, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Onboarding - coaching_style",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 24, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Goal Setting - realistic_goal",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 19, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Goal Setting - maintenance_goal",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 19, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Goal Setting - transition_goal",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 19, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Goal Setting - unrealistic_goal",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 19, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Progress - positive_progress",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 22, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Progress - setback",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 22, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Progress - plateau",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 22, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Progress - non_scale_victory",
+      "passed": false,
+      "message": "Agent invocation failed: Parameter validation failed:\nInvalid length for parameter runtimeSessionId, value: 22, valid min length: 33",
+      "duration_ms": 0
+    },
+    {
+      "name": "Error - empty_input",
+      "passed": true,
+      "message": "Skipped - validation expected",
+      "duration_ms": 0
+    },
+    {
+      "name": "Error - very_long_input",
+      "passed": true,
+      "message": "Exception handled: Agent invocation failed: Parameter validation fail",
+      "duration_ms": 0
+    },
+    {
+      "name": "Error - emoji_only",
+      "passed": true,
+      "message": "Exception handled: Agent invocation failed: Parameter validation fail",
+      "duration_ms": 0
+    },
+    {
+      "name": "Error - off_topic",
+      "passed": true,
+      "message": "Exception handled: Agent invocation failed: Parameter validation fail",
+      "duration_ms": 0
+    },
+    {
+      "name": "Response Time",
+      "passed": false,
+      "message": "No successful tests",
+      "duration_ms": 0
+    },
+    {
+      "name": "CloudWatch Logs - Recent",
+      "passed": false,
+      "message": "Last event 29509064 min ago",
+      "duration_ms": 0
+    },
+    {
+      "name": "CloudWatch Logs - Exists",
+      "passed": true,
+      "message": "",
+      "duration_ms": 0
+    }
+  ]
+}
