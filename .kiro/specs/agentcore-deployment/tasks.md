@@ -269,13 +269,13 @@ Create PowerShell script for automated AgentCore Runtime deployments.
 Create comprehensive CloudWatch dashboard.
 
 **Subtasks**:
-- [ ] 9.1 Create dashboard JSON template
-- [ ] 9.2 Add invocation metrics widget
-- [ ] 9.3 Add performance metrics widget
-- [ ] 9.4 Add error metrics widget
-- [ ] 9.5 Add cost metrics widget
-- [ ] 9.6 Deploy dashboard via AWS CLI
-- [ ] 9.7 Test dashboard visibility
+- [x] 9.1 Create dashboard JSON template
+- [x] 9.2 Add invocation metrics widget
+- [x] 9.3 Add performance metrics widget
+- [x] 9.4 Add error metrics widget
+- [x] 9.5 Add cost metrics widget
+- [x] 9.6 Deploy dashboard via AWS CLI
+- [x] 9.7 Test dashboard visibility
 
 ---
 
@@ -289,10 +289,10 @@ Implement cost monitoring and optimization.
 - [x] 10.1 Create cost monitoring script
 - [x] 10.2 Create pause infrastructure script
 - [x] 10.3 Create resume infrastructure script
-- [ ] 10.4 Set up CloudWatch cost alarms
-- [ ] 10.5 Create daily cost report automation
-- [ ] 10.6 Implement cost allocation tags
-- [ ] 10.7 Create cost anomaly detection
+- [x] 10.4 Set up CloudWatch cost alarms
+- [x] 10.5 Create daily cost report automation
+- [x] 10.6 Implement cost allocation tags
+- [x] 10.7 Create cost anomaly detection
 
 ---
 
