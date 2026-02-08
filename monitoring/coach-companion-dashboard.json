@@ -7,7 +7,7 @@
             "width": 12,
             "height": 6,
             "properties": {
-                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/agent-q9QEgD3UFo-DEFAULT'\n| stats count() as invocations by bin(5m)\n| sort @timestamp desc",
+                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/coach_companion-0ZUOP04U5z-DEFAULT'\n| stats count() as invocations by bin(5m)\n| sort @timestamp desc",
                 "region": "eu-west-1",
                 "title": "Invocation Rate (5min)",
                 "stacked": false
@@ -20,7 +20,7 @@
             "width": 12,
             "height": 6,
             "properties": {
-                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/agent-q9QEgD3UFo-DEFAULT'\n| filter @message like /completed/\n| stats count() as total by bin(5m)",
+                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/coach_companion-0ZUOP04U5z-DEFAULT'\n| filter @message like /completed/\n| stats count() as total by bin(5m)",
                 "region": "eu-west-1",
                 "title": "Completed Invocations (5min)",
                 "stacked": false
@@ -33,7 +33,7 @@
             "width": 12,
             "height": 6,
             "properties": {
-                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/agent-q9QEgD3UFo-DEFAULT'\n| filter @message like /ERROR/ or @message like /error/ or @message like /failed/\n| stats count() as error_count by bin(5m)",
+                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/coach_companion-0ZUOP04U5z-DEFAULT'\n| filter @message like /ERROR/ or @message like /error/ or @message like /failed/\n| stats count() as error_count by bin(5m)",
                 "region": "eu-west-1",
                 "title": "Error Rate (5min)",
                 "stacked": false
@@ -46,7 +46,7 @@
             "width": 12,
             "height": 6,
             "properties": {
-                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/agent-q9QEgD3UFo-DEFAULT'\n| filter @message like /ERROR/\n| fields @timestamp, @message\n| sort @timestamp desc\n| limit 10",
+                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/coach_companion-0ZUOP04U5z-DEFAULT'\n| filter @message like /ERROR/\n| fields @timestamp, @message\n| sort @timestamp desc\n| limit 10",
                 "region": "eu-west-1",
                 "title": "Recent Errors",
                 "stacked": false
@@ -59,7 +59,7 @@
             "width": 24,
             "height": 6,
             "properties": {
-                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/agent-q9QEgD3UFo-DEFAULT'\n| fields @timestamp, @message\n| sort @timestamp desc\n| limit 20",
+                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/coach_companion-0ZUOP04U5z-DEFAULT'\n| fields @timestamp, @message\n| sort @timestamp desc\n| limit 20",
                 "region": "eu-west-1",
                 "title": "Recent Activity",
                 "stacked": false
@@ -72,7 +72,7 @@
             "width": 12,
             "height": 6,
             "properties": {
-                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/agent-q9QEgD3UFo-DEFAULT'\n| stats count() as invocations by bin(1h)\n| sort @timestamp desc",
+                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/coach_companion-0ZUOP04U5z-DEFAULT'\n| stats count() as invocations by bin(1h)\n| sort @timestamp desc",
                 "region": "eu-west-1",
                 "title": "Hourly Invocation Trend",
                 "stacked": false
@@ -85,7 +85,7 @@
             "width": 12,
             "height": 6,
             "properties": {
-                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/agent-q9QEgD3UFo-DEFAULT'\n| filter @message like /Invocation/\n| stats count() as total",
+                "query": "SOURCE '/aws/bedrock-agentcore/runtimes/coach_companion-0ZUOP04U5z-DEFAULT'\n| filter @message like /Invocation/\n| stats count() as total",
                 "region": "eu-west-1",
                 "title": "Total Invocations",
                 "stacked": false

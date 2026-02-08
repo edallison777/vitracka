@@ -1,329 +1,489 @@
-# AWS Bedrock AgentCore Deployment Guide
-## Vitracka Weight Management System
+# ⚠️ CRITICAL: AgentCore Deployment Guide - READ THIS FIRST ⚠️
 
-This guide covers deploying Strands agents to AWS Bedrock AgentCore Runtime, which provides serverless, auto-scaling agent hosting.
-
----
-
-## Why AgentCore?
-
-✅ **Serverless** - No infrastructure to manage
-✅ **Auto-scaling** - Handles thousands of concurrent sessions
-✅ **Session isolation** - Dedicated microVMs for security
-✅ **Built-in observability** - CloudWatch integration
-✅ **Pay-per-use** - Only pay for actual agent invocations
-✅ **Session persistence** - Maintains conversation state
+**Last Updated**: February 8, 2026  
+**Status**: PRODUCTION-READY DEPLOYMENT PROCESS  
+**Region**: eu-west-1 ONLY (MANDATORY)
 
 ---
 
-## Prerequisites
+## 🎯 Quick Reference
 
-### 1. Install AgentCore Starter Toolkit
+This guide contains **critical lessons learned** from deploying agents to AWS Bedrock AgentCore Runtime. Following this guide will save hours of troubleshooting.
 
-```bash
-pip install bedrock-agentcore-starter-toolkit
-```
-
-### 2. Install AgentCore Runtime SDK
-
-```bash
-pip install bedrock-agentcore-runtime
-```
-
-### 3. Verify AWS Credentials
-
-```bash
-aws sts get-caller-identity
-```
+### Successfully Deployed Agents
+1. ✅ **test-agent** - `agent-q9QEgD3UFo` (eu-west-1)
+2. ✅ **coach-companion** - `coach_companion-0ZUOP04U5z` (eu-west-1)
 
 ---
 
-## Phase 1: Test Agent Deployment
+## 🚨 CRITICAL REQUIREMENTS
 
-**IMPORTANT**: Deploy the test agent first to validate the pipeline before deploying production agents.
+### 1. Region Requirement (MANDATORY)
+**ALL deployments MUST use `eu-west-1` (Europe - Ireland) ONLY.**
 
-### Step 1: Test Locally
+This is a strict project requirement. See [AWS_REGION_POLICY.md](./AWS_REGION_POLICY.md).
 
-```bash
-cd agents/test-agent
-pip install -r requirements.txt
-python agent.py
+### 2. Model Configuration (CRITICAL)
+**In eu-west-1, you MUST use inference profiles, NOT direct model IDs.**
+
+❌ **WRONG**: `anthropic.claude-3-5-sonnet-20241022-v2:0`  
+❌ **WRONG**: `anthropic.claude-3-5-sonnet-20240620-v1:0`  
+✅ **CORRECT**: `eu.anthropic.claude-3-5-sonnet-20240620-v1:0`
+
+**Why**: eu-west-1 requires inference profiles for on-demand throughput. Direct model IDs will fail with:
+```
+ValidationException: Invocation of model ID ... with on-demand throughput isn't supported. 
+Retry your request with the ID or ARN of an inference profile.
 ```
 
-Expected output:
-```
-Testing agent locally...
-Agent response: Hello from AgentCore! [cheerful message]
-✓ Local test passed!
+**How to find available inference profiles**:
+```powershell
+aws bedrock list-inference-profiles --region eu-west-1 --query "inferenceProfileSummaries[?contains(inferenceProfileName, 'Claude')].{Name:inferenceProfileName, Id:inferenceProfileId}" --output table
 ```
 
-### Step 2: Build Docker Image
+### 3. Configuration File Structure (CRITICAL)
+**AgentCore requires ABSOLUTE PATHS in `.bedrock_agentcore.yaml`**
 
-#### Option A: Local Build (if Docker supports ARM64)
-
-Check if your Docker supports ARM64:
-```bash
-docker buildx ls
+❌ **WRONG**:
+```yaml
+entrypoint: agent.py
+source_path: agents/my-agent
 ```
 
-If supported:
-```bash
-cd agents/test-agent
-docker buildx create --use
-docker buildx build --platform linux/arm64 -t test-agent:latest .
+✅ **CORRECT**:
+```yaml
+entrypoint: C:/Users/j_e_a/OneDrive/Projects/Vitracka-new/agents/my-agent/agent.py
+source_path: C:\Users\j_e_a\OneDrive\Projects\Vitracka-new\agents\my-agent
 ```
 
-#### Option B: AWS CodeBuild (Recommended for Windows)
+**Why**: AgentCore packages the source directory and needs absolute paths to locate files correctly. Relative paths cause "entrypoint could not be found" errors.
 
-1. **Create ECR Repository**:
-```bash
-aws ecr create-repository --repository-name vitracka-test-agent --region us-east-1
+### 4. Python PATH Issue (WINDOWS)
+**The `agentcore` command requires Python Scripts directory in PATH**
+
+If you get "agentcore: command not found", run:
+```powershell
+$PythonScriptsPath = "$env:APPDATA\Python\Python312\Scripts"
+$UserPath = [Environment]::GetEnvironmentVariable("Path", "User")
+if ($UserPath -notlike "*$PythonScriptsPath*") {
+    $NewPath = "$UserPath;$PythonScriptsPath"
+    [Environment]::SetEnvironmentVariable("Path", $NewPath, "User")
+}
+$env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
 ```
 
-2. **Create CodeBuild Project**:
-```bash
-aws codebuild create-project \
-  --name vitracka-test-agent-build \
-  --source type=LOCAL,location=agents/test-agent \
-  --artifacts type=NO_ARTIFACTS \
-  --environment type=ARM_CONTAINER,image=aws/codebuild/amazonlinux2-aarch64-standard:3.0,computeType=BUILD_GENERAL1_SMALL \
-  --service-role arn:aws:iam::732231126129:role/CodeBuildServiceRole \
-  --region us-east-1
+**This adds the directory permanently to User PATH and updates the current session.**
+
+---
+
+## 📋 Step-by-Step Deployment Process
+
+### Prerequisites
+1. AWS CLI configured with credentials
+2. AgentCore CLI installed: `pip install bedrock-agentcore-starter-toolkit`
+3. Python Scripts directory in PATH (see above)
+4. Region set to eu-west-1
+
+### Step 1: Create Agent Directory Structure
+```
+agents/
+└── my-agent/
+    ├── agent.py              # Main agent code with @app.entrypoint
+    ├── requirements.txt      # Dependencies
+    └── README.md            # Documentation
 ```
 
-3. **Start Build**:
-```bash
-aws codebuild start-build --project-name vitracka-test-agent-build
-```
+### Step 2: Write Agent Code
 
-4. **Monitor Build**:
-```bash
-aws codebuild batch-get-builds --ids <build-id>
-```
-
-### Step 3: Deploy to AgentCore
-
-#### Using AgentCore Starter Toolkit
-
-```bash
-cd agents/test-agent
-
-# Test locally first (optional)
-agentcore launch --local
-
-# Deploy to AWS
-agentcore launch
-```
-
-The toolkit will:
-1. Package your agent code
-2. Build ARM64 container image
-3. Push to ECR
-4. Create AgentCore Runtime
-5. Configure IAM roles
-6. Set up CloudWatch logging
-
-#### Manual Deployment (Alternative)
+**CRITICAL**: Use the `@app.entrypoint` decorator pattern:
 
 ```python
-import boto3
+from strands import Agent
+from strands.models import BedrockModel
+from bedrock_agentcore import BedrockAgentCoreApp
+import os
 
-client = boto3.client('bedrock-agentcore-runtime', region_name='us-east-1')
+# Create AgentCore app
+app = BedrockAgentCoreApp()
 
-response = client.create_agent_runtime(
-    agentName='test-agent',
-    description='Test agent for deployment validation',
-    containerImage='732231126129.dkr.ecr.us-east-1.amazonaws.com/vitracka-test-agent:latest',
-    executionRoleArn='arn:aws:iam::732231126129:role/AgentCoreExecutionRole'
-)
+def create_agent():
+    """Create your agent with proper model configuration."""
+    model = BedrockModel(
+        # CRITICAL: Use EU inference profile, not direct model ID
+        model_id=os.getenv("MODEL_ID", "eu.anthropic.claude-3-5-sonnet-20240620-v1:0"),
+        region_name=os.getenv("AWS_REGION", "eu-west-1"),
+        temperature=0.7,
+        max_tokens=1024,
+    )
+    
+    agent = Agent(
+        model=model,
+        system_prompt="Your system prompt here"
+    )
+    
+    return agent
 
-agent_id = response['agentId']
-print(f"Agent deployed! ID: {agent_id}")
-```
-
-### Step 4: Test Deployment
-
-```python
-import boto3
-
-client = boto3.client('bedrock-agentcore-runtime', region_name='us-east-1')
-
-response = client.invoke_agent(
-    agentId='<your-agent-id>',
-    input={'prompt': 'Hello, test agent!'}
-)
-
-print(response['output'])
-```
-
-Expected output:
-```
-Hello from AgentCore! [cheerful message]
-```
-
-### Step 5: Verify in CloudWatch
-
-```bash
-# View logs
-aws logs tail /aws/bedrock-agentcore/test-agent --follow
-```
-
----
-
-## Phase 2: Production Agent Deployment
-
-Once the test agent works, deploy the Coach Companion agent:
-
-### Step 1: Update Coach Companion for AgentCore
-
-Modify `agents/coach-companion/app.py`:
-
-```python
-from bedrock_agentcore_runtime import BedrockAgentCoreApp
-from agent import CoachCompanionAgent
-
-# Create the agent
-coach_agent = CoachCompanionAgent()
-
-# Wrap for AgentCore Runtime
-app = BedrockAgentCoreApp(
-    agent=coach_agent.agent,
-    name="coach-companion",
-    description="AI-powered weight management coaching with safety-first approach"
-)
+@app.entrypoint
+def handler(event, context):
+    """AgentCore entrypoint handler."""
+    prompt = event.get("prompt", "Hello")
+    agent = create_agent()
+    response = agent(prompt)
+    
+    return {
+        "response": response.message
+    }
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    import sys
+    if '--local-test' in sys.argv:
+        # Test locally
+        test_event = {"prompt": "Test message"}
+        result = handler(test_event, None)
+        print(result)
+    else:
+        # Let AgentCore handle the runtime
+        app.run()
 ```
 
-### Step 2: Add Dockerfile
+### Step 3: Create requirements.txt
 
-```dockerfile
-FROM --platform=$TARGETPLATFORM python:3.11-slim
+```txt
+# Strands SDK for agent orchestration
+strands-agents>=0.1.0
 
-WORKDIR /app
+# AgentCore SDK
+bedrock-agentcore>=0.1.0
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir bedrock-agentcore-runtime
-
-COPY agent.py .
-COPY app.py .
-
-EXPOSE 8080
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8080/ping')" || exit 1
-
-CMD ["python", "app.py"]
+# AWS SDK
+boto3>=1.34.0
 ```
 
-### Step 3: Deploy
+### Step 4: Configure Agent
 
-```bash
-cd agents/coach-companion
-agentcore launch
+**Navigate to agent directory first**:
+```powershell
+cd agents/my-agent
+```
+
+**Then configure** (AgentCore will create `.bedrock_agentcore.yaml`):
+```powershell
+agentcore configure --entrypoint agent.py --requirements-file requirements.txt --name my_agent --region eu-west-1 --deployment-type direct_code_deploy --non-interactive
+```
+
+**IMPORTANT**: 
+- Agent names must use underscores, not hyphens: `my_agent` not `my-agent`
+- Run from the agent directory so paths are set correctly
+
+### Step 5: Verify Configuration
+
+Check `.bedrock_agentcore.yaml` was created with ABSOLUTE paths:
+```yaml
+default_agent: agent
+agents:
+  agent:
+    name: my_agent
+    entrypoint: C:/Users/j_e_a/OneDrive/Projects/Vitracka-new/agents/my-agent/agent.py
+    source_path: C:\Users\j_e_a\OneDrive\Projects\Vitracka-new\agents\my-agent
+    deployment_type: direct_code_deploy
+    runtime_type: PYTHON_3_12
+    aws:
+      region: eu-west-1  # MUST be eu-west-1
+```
+
+**If paths are relative, manually edit to absolute paths.**
+
+### Step 6: Deploy
+
+```powershell
+# Still in agents/my-agent directory
+agentcore deploy
+```
+
+**Expected output**:
+- Dependencies will be built for Linux ARM64
+- Package uploaded to S3
+- Agent created/updated with ARN
+- "Deployment completed successfully"
+
+**Deployment takes 2-5 minutes** (longer on first deploy due to dependency building).
+
+### Step 7: Verify Deployment
+
+```powershell
+agentcore status
+```
+
+**Look for**: `Ready - Agent deployed and endpoint available`
+
+### Step 8: Test Agent
+
+```powershell
+agentcore invoke '{"prompt": "Hello, test message"}'
+```
+
+**Expected**: JSON response with agent's message.
+
+---
+
+## 🐛 Common Issues and Solutions
+
+### Issue 1: "entrypoint could not be found"
+**Symptom**: Deployment succeeds but agent fails to start  
+**Cause**: Relative paths in `.bedrock_agentcore.yaml`  
+**Solution**: Edit config file to use absolute paths (see Step 5)
+
+### Issue 2: "Invalid model identifier"
+**Symptom**: Agent invocation fails with ValidationException  
+**Cause**: Using direct model ID instead of inference profile  
+**Solution**: Change model_id to `eu.anthropic.claude-3-5-sonnet-20240620-v1:0`
+
+### Issue 3: "agentcore: command not found"
+**Symptom**: PowerShell can't find agentcore command  
+**Cause**: Python Scripts directory not in PATH  
+**Solution**: Run PATH fix script (see Section 4 above)
+
+### Issue 4: "Invalid agent name"
+**Symptom**: Configure fails with name validation error  
+**Cause**: Agent name contains hyphens  
+**Solution**: Use underscores: `my_agent` not `my-agent`
+
+### Issue 5: "No requirements file found"
+**Symptom**: Configure fails looking for requirements.txt  
+**Cause**: File not in current directory or not specified  
+**Solution**: Use `--requirements-file requirements.txt` flag
+
+### Issue 6: "Region mismatch"
+**Symptom**: Resources created in wrong region  
+**Cause**: Not specifying region or using wrong region  
+**Solution**: Always use `--region eu-west-1` and verify in config
+
+---
+
+## 📁 File Structure Reference
+
+### Working Agent Structure (test-agent)
+```
+agents/test-agent/
+├── .bedrock_agentcore/          # Auto-generated cache
+│   └── agent/
+│       ├── dependencies.hash
+│       └── dependencies.zip
+├── .bedrock_agentcore.yaml      # Configuration (absolute paths)
+├── agent.py                     # Main code with @app.entrypoint
+├── requirements.txt             # Dependencies
+├── README.md                    # Documentation
+└── app.py                       # Optional FastAPI wrapper
+```
+
+### Configuration File Template
+```yaml
+default_agent: agent
+agents:
+  agent:
+    name: agent_name
+    language: python
+    node_version: '20'
+    entrypoint: C:/Users/j_e_a/OneDrive/Projects/Vitracka-new/agents/agent-name/agent.py
+    deployment_type: direct_code_deploy
+    runtime_type: PYTHON_3_12
+    platform: linux/arm64
+    container_runtime: null
+    source_path: C:\Users\j_e_a\OneDrive\Projects\Vitracka-new\agents\agent-name
+    aws:
+      execution_role: arn:aws:iam::732231126129:role/AmazonBedrockAgentCoreSDKRuntime-eu-west-1-xxxxx
+      execution_role_auto_create: false
+      account: '732231126129'
+      region: eu-west-1
+      ecr_repository: null
+      ecr_auto_create: false
+      s3_path: s3://bedrock-agentcore-codebuild-sources-732231126129-eu-west-1
+      s3_auto_create: false
+      network_configuration:
+        network_mode: PUBLIC
+        network_mode_config: null
+      protocol_configuration:
+        server_protocol: HTTP
+      observability:
+        enabled: true
+      lifecycle_configuration:
+        idle_runtime_session_timeout: null
+        max_lifetime: null
+    bedrock_agentcore:
+      agent_id: agent-xxxxx
+      agent_arn: arn:aws:bedrock-agentcore:eu-west-1:732231126129:runtime/agent-xxxxx
+      agent_session_id: null
+    memory:
+      mode: STM_ONLY
+      memory_id: agent_mem-xxxxx
+      memory_arn: arn:aws:bedrock-agentcore:eu-west-1:732231126129:memory/agent_mem-xxxxx
+      memory_name: agent_mem
+      event_expiry_days: 30
+      first_invoke_memory_check_done: true
+      was_created_by_toolkit: true
 ```
 
 ---
 
-## Troubleshooting
+## 🔍 Verification Checklist
 
-### Issue: Docker doesn't support ARM64 on Windows
+Before deploying a new agent, verify:
 
-**Solution**: Use AWS CodeBuild (Option B above)
+- [ ] Agent directory created in `agents/`
+- [ ] `agent.py` has `@app.entrypoint` decorator
+- [ ] `requirements.txt` includes strands-agents, bedrock-agentcore, boto3
+- [ ] Model ID uses EU inference profile: `eu.anthropic.claude-3-5-sonnet-20240620-v1:0`
+- [ ] Region set to `eu-west-1` in code
+- [ ] Agent name uses underscores (not hyphens)
+- [ ] Python Scripts directory in PATH
+- [ ] Running from agent directory when configuring
+- [ ] `.bedrock_agentcore.yaml` has absolute paths
+- [ ] AWS credentials configured
 
-### Issue: "Platform not supported" error
+---
 
-**Solution**: Ensure you're using CodeBuild with ARM_CONTAINER environment type
+## 📊 Monitoring and Logs
 
-### Issue: Agent fails to start
-
-**Solution**: Check CloudWatch logs:
-```bash
-aws logs tail /aws/bedrock-agentcore/<agent-name> --follow
+### View Agent Status
+```powershell
+cd agents/my-agent
+agentcore status
 ```
 
-### Issue: Import errors in container
-
-**Solution**: Verify all dependencies are in requirements.txt and Dockerfile installs them
-
----
-
-## Cost Estimation
-
-AgentCore Runtime pricing (pay-per-use):
-- **Per invocation**: ~$0.0001 - $0.001 (depending on duration)
-- **Session storage**: ~$0.10/GB-month
-- **No baseline costs** - only pay when agents are invoked
-
-**Example**: 10,000 invocations/month = ~$1-10/month
-
-Much cheaper than running ECS Fargate 24/7!
-
----
-
-## Monitoring and Observability
-
-### Enable CloudWatch Observability
-
-```bash
-# Enable transaction search (one-time setup)
-aws cloudwatch enable-transaction-search --region us-east-1
+### View Logs
+```powershell
+aws logs tail /aws/bedrock-agentcore/runtimes/<agent-id>-DEFAULT --log-stream-name-prefix "2026/02/08/[runtime-logs" --follow --region eu-west-1
 ```
 
-### View Metrics
+### CloudWatch Dashboard
+https://console.aws.amazon.com/cloudwatch/home?region=eu-west-1#gen-ai-observability/agent-core
 
-1. Open CloudWatch Console
-2. Navigate to "GenAI Observability"
-3. Find your agent service
-4. View traces, metrics, and logs
-
-### Key Metrics to Monitor
-
-- **Invocation count**: Number of agent calls
-- **Latency**: Response time (p50, p95, p99)
-- **Error rate**: Failed invocations
-- **Token usage**: LLM token consumption
-- **Session duration**: How long conversations last
-
----
-
-## Next Steps
-
-1. ✅ Deploy test agent
-2. ✅ Verify test agent works
-3. ✅ Deploy Coach Companion agent
-4. Configure auto-scaling policies
-5. Set up CloudWatch alarms
-6. Integrate with mobile app
-7. Begin user acceptance testing
-
----
-
-## Rollback Procedure
-
-If something goes wrong:
-
-```bash
-# Delete agent runtime
-aws bedrock-agentcore-runtime delete-agent-runtime --agent-id <agent-id>
-
-# Delete ECR images
-aws ecr batch-delete-image \
-  --repository-name vitracka-test-agent \
-  --image-ids imageTag=latest
+### Cost Monitoring
+```powershell
+.\scripts\daily-cost-report.ps1
 ```
 
 ---
 
-## Support Resources
+## 🔄 Redeployment Process
 
-- **AgentCore Documentation**: https://docs.aws.amazon.com/bedrock-agentcore/
-- **Strands Documentation**: https://strandsagents.com/
-- **AWS Support**: Use AWS Console support center
+To update an existing agent:
+
+1. **Modify code** in `agents/my-agent/agent.py`
+2. **Navigate to directory**: `cd agents/my-agent`
+3. **Deploy**: `agentcore deploy`
+4. **Test**: `agentcore invoke '{"prompt": "test"}'`
+
+**Note**: Configuration changes require `agentcore configure` again.
 
 ---
 
-**Ready to deploy?** Start with the test agent in Phase 1!
+## 🗑️ Cleanup
+
+To remove an agent:
+
+```powershell
+cd agents/my-agent
+agentcore destroy
+```
+
+**This will delete**:
+- Agent runtime
+- Memory resource
+- CloudWatch logs (after retention period)
+
+**This will NOT delete**:
+- IAM roles (shared across agents)
+- S3 bucket (shared across agents)
+
+---
+
+## 💡 Best Practices
+
+### 1. Agent Naming
+- Use descriptive names: `coach_companion`, `test_agent`
+- Use underscores, not hyphens
+- Keep names under 48 characters
+- Use lowercase
+
+### 2. Model Configuration
+- Always use environment variables for model_id
+- Default to EU inference profile
+- Set appropriate temperature (0.7 for creative, 0.1 for factual)
+- Set max_tokens based on use case (512-2048)
+
+### 3. Error Handling
+- Wrap handler in try-except
+- Return user-friendly error messages
+- Log errors for debugging
+- Never expose internal errors to users
+
+### 4. Testing
+- Test locally with `--local-test` flag before deploying
+- Test with various input formats
+- Test error scenarios
+- Monitor logs after deployment
+
+### 5. Cost Management
+- Use STM_ONLY memory mode (cheaper)
+- Set appropriate max_tokens
+- Monitor invocation counts
+- Use `agentcore destroy` when not needed
+
+---
+
+## 📚 Reference Documentation
+
+### Official Docs
+- [AWS Bedrock AgentCore](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-agentcore.html)
+- [Strands SDK](https://github.com/awslabs/strands-agents)
+- [AgentCore Starter Toolkit](https://pypi.org/project/bedrock-agentcore-starter-toolkit/)
+
+### Project Docs
+- [AWS_REGION_POLICY.md](./AWS_REGION_POLICY.md) - Region requirements
+- [COACH_COMPANION_DEPLOYMENT_SUCCESS.md](./COACH_COMPANION_DEPLOYMENT_SUCCESS.md) - Deployment example
+- [AGENTCORE_QUICKSTART.md](./AGENTCORE_QUICKSTART.md) - Quick start guide
+
+---
+
+## 🎓 Key Lessons Learned
+
+1. **Absolute paths are required** - AgentCore cannot resolve relative paths correctly
+2. **Inference profiles are mandatory in eu-west-1** - Direct model IDs fail
+3. **PATH issues persist** - Must permanently add Python Scripts to User PATH
+4. **Agent names matter** - Underscores only, no hyphens
+5. **Directory context matters** - Run configure from agent directory
+6. **@app.entrypoint is required** - AgentCore won't find handler without it
+7. **Direct deployment is simpler** - No Docker/ECR needed
+8. **First deployment is slow** - Dependencies must be built for ARM64
+
+---
+
+## ✅ Success Indicators
+
+Your deployment is successful when:
+
+1. `agentcore status` shows "Ready - Agent deployed and endpoint available"
+2. `agentcore invoke` returns a proper response (not an error)
+3. CloudWatch logs show successful invocations
+4. Agent ARN is visible in AWS Console
+5. Memory resource is ACTIVE
+6. No error messages in deployment output
+
+---
+
+## 🆘 Getting Help
+
+If you encounter issues not covered here:
+
+1. Check CloudWatch logs for detailed errors
+2. Verify all checklist items above
+3. Compare your setup with working agents (test-agent, coach-companion)
+4. Check AWS Bedrock service quotas
+5. Verify IAM permissions
+
+---
+
+**This guide is based on real deployment experience from February 8, 2026.**  
+**Following these steps exactly will result in successful deployments.**
+
