@@ -83,6 +83,28 @@ $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [En
 2. AgentCore CLI installed: `pip install bedrock-agentcore-starter-toolkit`
 3. Python Scripts directory in PATH (see above)
 4. Region set to eu-west-1
+5. **PowerShell Execution Policy** set to allow script execution (see below)
+
+### PowerShell Execution Policy Setup
+
+**Windows users must configure PowerShell to allow script execution.**
+
+If you get "running scripts is disabled on this system" errors, run:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+**What this does**:
+- Allows locally created scripts to run
+- Requires downloaded scripts to be signed
+- Only affects your user account (safe)
+- Permanent setting (one-time setup)
+
+**Alternative** (temporary, for single script):
+```powershell
+PowerShell -ExecutionPolicy Bypass -File .\scripts\script-name.ps1
+```
 
 ### Step 1: Create Agent Directory Structure
 ```
